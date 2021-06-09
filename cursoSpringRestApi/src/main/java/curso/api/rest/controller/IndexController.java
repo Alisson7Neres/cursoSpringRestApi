@@ -29,7 +29,6 @@ public class IndexController {
 
 	// Serviço RESTFul
 	
-	@SuppressWarnings("rawtypes")
 	@GetMapping(value = "/{id}", produces = "application/json")
 	public ResponseEntity<Usuario> init(@PathVariable(value = "id") Long id) {
 		
@@ -41,7 +40,7 @@ public class IndexController {
 	@SuppressWarnings("rawtypes")
 	@GetMapping(value = "/codigo", produces = "application/json")
 	public ResponseEntity codigo() {
-		return new ResponseEntity("Barra doido", HttpStatus.OK);
+		return new ResponseEntity("Teste", HttpStatus.OK);
 	}
 	
 	@GetMapping(value = "/", produces = "application/json")
