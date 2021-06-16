@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,11 +29,19 @@ public class IndexController {
 	
 	@Autowired
 	private UsuarioRepository usuarioRepository;
-
+	
 	// Serviço RESTFul
 	
-	@GetMapping(value = "/{id}", produces = "application/json")
-	public ResponseEntity<Usuario> init(@PathVariable(value = "id") Long id) {
+	@GetMapping(value = "/{id}", produces = "application/json", headers = "X-API-Version=v1")
+	public ResponseEntity<Usuario> initV1(@PathVariable(value = "id") Long id) {
+		
+		Optional<Usuario> usuario = usuarioRepository.findById(id);
+		
+		return new ResponseEntity<Usuario>(usuario.get(), HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/{id}", produces = "application/json", headers = "X-API-Version=v2")
+	public ResponseEntity<Usuario> initV2(@PathVariable(value = "id") Long id) {
 		
 		Optional<Usuario> usuario = usuarioRepository.findById(id);
 		
@@ -45,9 +55,12 @@ public class IndexController {
 	}
 	
 	@GetMapping(value = "/", produces = "application/json")
-	public ResponseEntity<List<Usuario>> usuarioLista(){
+	@CacheEvict(value = "cacheusuarios", allEntries = true)
+	@CachePut("cacheusuarios")
+	public ResponseEntity<List<Usuario>> usuarioLista() throws InterruptedException{
 		
 		List<Usuario> list = (List<Usuario>) usuarioRepository.findAll();
+		
 		return new ResponseEntity<List<Usuario>>(list, HttpStatus.OK);
 	}
 	
