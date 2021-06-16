@@ -44,8 +44,8 @@ public class JWTTokenAutenticacaoService {
 		String token = TOKE_PREFIX + " " + JWT; // Bearer
 		// Adiciona no cabeçalho http
 		response.addHeader(HEADER_STRING, token); // Authorization: Bearer
-		
-		//liberarCORS(response);
+		// Liberando resposta para portas diferentes que usam a API ou clientes WEB
+		liberacaoCors(response);
 		// Escreve token como resposta no corpo http
 		response.getWriter().write("{\"Authorizario\": \""+token+"\"}");
 	}
@@ -56,23 +56,44 @@ public class JWTTokenAutenticacaoService {
 		// Pega o token enviado no cabeçalho http
 		String token = request.getHeader(HEADER_STRING);
 		if(token != null) {
+			
+			String tokenLimpo = token.replace(TOKE_PREFIX, "").trim();
 			// Faz a validação do token do usuário na requisição
 			String user = Jwts.parser().setSigningKey(SECRET)
-						  .parseClaimsJws(token.replace(TOKE_PREFIX, ""))
+						  .parseClaimsJws(tokenLimpo)
 						  .getBody().getSubject(); 
 			
 			if(user != null) {
 				Usuario usuario = ApplicationContextLoad.getApplicationContext()
 						.getBean(UsuarioRepository.class).findUserByLogin(user);
 				if(usuario != null) {
+					if(tokenLimpo.equalsIgnoreCase(usuario.getToken())) {
 					return new UsernamePasswordAuthenticationToken(
 							usuario.getLogin(), 
 							usuario.getSenha(),
 							usuario.getAuthorities());
+					}
 				}
 			}
 		}
+		
+		liberacaoCors(response);
 		return null; // Não autorizado
 		
+	}
+
+	private void liberacaoCors(HttpServletResponse response) {
+		if(response.getHeader("Acess-Control-Allow-Origin") == null) {
+			response.addHeader("Acess-Control-Allow-Origin", "*");
+		}
+		if(response.getHeader("Acess-Control-Allow-Headers") == null) {
+			response.addHeader("Acess-Control-Allow-Headers", "*");
+		}
+		if(response.getHeader("Acess-Control-Allow-Headers") == null) {
+			response.addHeader("Acess-Control-Allow-Headers", "*");
+		}
+		if(response.getHeader("Acess-Control-Allow-Methods") == null) {
+			response.addHeader("Acess-Control-Allow-Methods","*");
+		}
 	}
 }
