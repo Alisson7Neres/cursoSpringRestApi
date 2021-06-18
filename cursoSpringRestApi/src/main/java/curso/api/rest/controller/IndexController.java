@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import curso.api.rest.model.Usuario;
+import curso.api.rest.model.UsuarioDTO;
 import curso.api.rest.repository.UsuarioRepository;
 
 @CrossOrigin(origins = "*")
@@ -33,19 +34,19 @@ public class IndexController {
 	// Serviço RESTFul
 	
 	@GetMapping(value = "/{id}", produces = "application/json", headers = "X-API-Version=v1")
-	public ResponseEntity<Usuario> initV1(@PathVariable(value = "id") Long id) {
+	public ResponseEntity<UsuarioDTO> initV1(@PathVariable(value = "id") Long id) {
 		
 		Optional<Usuario> usuario = usuarioRepository.findById(id);
 		
-		return new ResponseEntity<Usuario>(usuario.get(), HttpStatus.OK);
+		return new ResponseEntity<UsuarioDTO>(new UsuarioDTO(usuario.get()), HttpStatus.OK);
 	}
 	
 	@GetMapping(value = "/{id}", produces = "application/json", headers = "X-API-Version=v2")
-	public ResponseEntity<Usuario> initV2(@PathVariable(value = "id") Long id) {
+	public ResponseEntity<UsuarioDTO> initV2(@PathVariable(value = "id") Long id) {
 		
 		Optional<Usuario> usuario = usuarioRepository.findById(id);
 		
-		return new ResponseEntity<Usuario>(usuario.get(), HttpStatus.OK);
+		return new ResponseEntity<UsuarioDTO> ( new UsuarioDTO(usuario.get()), HttpStatus.OK);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
