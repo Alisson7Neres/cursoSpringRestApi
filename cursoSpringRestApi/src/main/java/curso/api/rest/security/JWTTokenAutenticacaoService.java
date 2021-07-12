@@ -44,6 +44,10 @@ public class JWTTokenAutenticacaoService {
 		String token = TOKE_PREFIX + " " + JWT; // Bearer
 		// Adiciona no cabeçalho http
 		response.addHeader(HEADER_STRING, token); // Authorization: Bearer
+		
+		ApplicationContextLoad.getApplicationContext()
+		.getBean(UsuarioRepository.class).atualizaTokenUser(JWT, username);
+		
 		// Liberando resposta para portas diferentes que usam a API ou clientes WEB
 		liberacaoCors(response);
 		// Escreve token como resposta no corpo http
