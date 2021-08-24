@@ -45,13 +45,15 @@ public class JWTTokenAutenticacaoService {
 		// Adiciona no cabeçalho http
 		response.addHeader(HEADER_STRING, token); // Authorization: Bearer
 		
+		liberacaoCros(response);
+		
 		ApplicationContextLoad.getApplicationContext()
 		.getBean(UsuarioRepository.class).atualizaTokenUser(JWT, username);
 		
 		// Liberando resposta para portas diferentes que usam a API ou clientes WEB
 		liberacaoCors(response);
 		// Escreve token como resposta no corpo http
-		response.getWriter().write("{\"Authorizario\": \""+token+"\"}");
+		response.getWriter().write("{\"Authorization\": \""+token+"\"}");
 	}
 	
 	// Retorna o usuário validado com token ou caso não seja válido retorna null
@@ -90,8 +92,25 @@ public class JWTTokenAutenticacaoService {
 		}
 	}
 		liberacaoCors(response);
+		// Libera resposta em portas diferentes
+		liberacaoCros(response);
 		return null; // Não autorizado
 		
+	}
+
+	private void liberacaoCros(HttpServletResponse response) {
+		if(response.getHeader("Access-Control-Allow-Origin") == null) {
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		}
+		if(response.getHeader("Access-Control-Allow-Headers") == null) {
+			response.addHeader("Access-Control-Allow-Headers", "*");
+		}
+		if(response.getHeader("Access-Control-Request-Headers") == null) {
+			response.addHeader("Access-Control-Request-Headers", "*");
+		}
+		if(response.getHeader("Access-Control-Allow-Methods ") == null) {
+			response.addHeader("Access-Control-Allow-Methods ","*");
+		}
 	}
 
 	private void liberacaoCors(HttpServletResponse response) {

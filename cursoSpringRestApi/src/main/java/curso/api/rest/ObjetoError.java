@@ -1,7 +1,7 @@
 package curso.api.rest;
 
-public class ObjetoErro {
-
+public class ObjetoError {
+	
 	private String error;
 	private String code;
 	
@@ -19,4 +19,5 @@ public class ObjetoErro {
 	}
 	
 	
+
 }

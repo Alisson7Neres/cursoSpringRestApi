@@ -19,53 +19,56 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 @ControllerAdvice
-public class ControllerExcecoes extends ResponseEntityExceptionHandler {
-	
-	// Interceptar erros  mais comuns
-	@ExceptionHandler({ Exception.class, RuntimeException.class, Throwable.class })
+public class ControleExcecoes extends ResponseEntityExceptionHandler {
+	// Tratamento da maioria dos erros
 	@Override
+	@ExceptionHandler({ Exception.class, RuntimeException.class, Throwable.class })
 	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
-
+		
 		String msg = "";
-
-		if (ex instanceof MethodArgumentNotValidException) {
+		
+		if(ex instanceof MethodArgumentNotValidException) {
 			List<ObjectError> list = ((MethodArgumentNotValidException) ex).getBindingResult().getAllErrors();
 			for (ObjectError objectError : list) {
 				msg += objectError.getDefaultMessage() + "\n";
 			}
-		} else {
+		}else {
 			msg = ex.getMessage();
 		}
 
-		ObjetoErro objetoErro = new ObjetoErro();
-		objetoErro.setError(msg);
-		objetoErro.setCode(status.value() + " ==> " + status.getReasonPhrase());
-
-		return new ResponseEntity<>(objetoErro, headers, status);
+		ObjetoError objetoError = new ObjetoError();
+		objetoError.setError(msg);
+		objetoError.setCode(status.value() + " ==> " + status.getReasonPhrase());
+		return new ResponseEntity<Object>(objetoError, headers, status);
 	}
 
-	// Tratamento a nível de banco de dados
-	@ExceptionHandler({DataIntegrityViolationException.class, ConstraintViolationException.class,
-		PSQLException.class, SQLException.class})
-	protected ResponseEntity<Object> handleExceptionDataIntegry(Exception ex){
-		
+	// Tratamento de erros a nível de banco de dados
+	@ExceptionHandler({ DataIntegrityViolationException.class, ConstraintViolationException.class, PSQLException.class,
+			SQLException.class })
+
+	protected ResponseEntity<Object> handleExceptionDataEntegry(Exception ex) {
 		String msg = "";
-		
-		if(ex instanceof DataIntegrityViolationException) {
+		if (ex instanceof DataIntegrityViolationException) {
 			msg = ((DataIntegrityViolationException) ex).getCause().getCause().getMessage();
-		}else if(ex instanceof ConstraintViolationException){
+		} 
+		else if (ex instanceof ConstraintViolationException) {
 			msg = ((ConstraintViolationException) ex).getCause().getCause().getMessage();
-		}else if(ex instanceof PSQLException){
+		} 
+		else if (ex instanceof PSQLException) {
 			msg = ((PSQLException) ex).getCause().getCause().getMessage();
-		}else if(ex instanceof SQLException){
+		} 
+		else if (ex instanceof SQLException) {
 			msg = ((SQLException) ex).getCause().getCause().getMessage();
-		}else {
-			msg = ex.getMessage(); // Outras menssagens de erro
+		} 
+		else {
+			msg = ex.getMessage();
 		}
 
-	ObjetoErro objetoErro = new ObjetoErro();objetoErro.setError(msg);objetoErro.setCode(HttpStatus.INTERNAL_SERVER_ERROR+" ==> "+HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-
-	return new ResponseEntity<>(objetoErro,HttpStatus.INTERNAL_SERVER_ERROR);
-
-}}
+		ObjetoError objetoError = new ObjetoError();
+		objetoError.setError(msg);
+		objetoError.setCode(
+				HttpStatus.INTERNAL_SERVER_ERROR + " ==> " + HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+		return new ResponseEntity<Object>(objetoError, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+}
