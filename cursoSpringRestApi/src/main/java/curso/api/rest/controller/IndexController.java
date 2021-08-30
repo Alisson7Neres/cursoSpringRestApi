@@ -200,4 +200,25 @@ public class IndexController {
 		
 		return new ResponseEntity<Page<Usuario>>(list, HttpStatus.OK);
 	}
+	
+	@GetMapping(value = "/usuarioPorNome/{nome}/page/{page}", produces="application/json")
+	@CachePut("cacheusuarios")
+	public ResponseEntity<Page<Usuario>> usuarioPorNomePage(@PathVariable("nome") String nome ,
+			@PathVariable(name = "page") int page) throws InterruptedException {
+		
+		PageRequest pageRequest = null;
+		Page<Usuario> list = null;
+		
+		// Não informou o nome
+		if(nome == null || (nome != null && nome.trim().isEmpty())
+				|| nome.equalsIgnoreCase("undefined")) {
+			pageRequest = PageRequest.of(page, 5, Sort.by("nome"));
+			list = usuarioRepository.findAll(pageRequest);
+		}else {
+			pageRequest = PageRequest.of(page, 5, Sort.by("nome"));
+			list = usuarioRepository.findUserByNamePage(nome, pageRequest);
+		}
+		
+		return new ResponseEntity<Page<Usuario>>(list, HttpStatus.OK);
+	}
 }

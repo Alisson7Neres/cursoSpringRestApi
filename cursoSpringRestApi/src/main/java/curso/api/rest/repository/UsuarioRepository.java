@@ -51,9 +51,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long>{
 		
 		Example<Usuario> example = Example.of(usuario, exampleMatcher);
 		
-		Page<Usuario> retorno = findAll(example, pageRequest);
-		
-		return retorno;
+		return findAll(example, pageRequest);
 		
 	}
 }
