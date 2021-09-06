@@ -1,5 +1,6 @@
 package curso.api.rest.model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -15,59 +16,64 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.UniqueConstraint;
 
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-public class Usuario implements UserDetails{
+public class Usuario implements UserDetails {
 
 	private static final long serialVersionUID = -3671186969719156576L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
+
 	@Column(unique = true)
 	private String login;
-	
+
 	private String senha;
-	
+
 	private String nome;
-	
+
 	@Column(unique = true)
 	private String cpf;
-	
-	@OneToMany(mappedBy = "usuario", orphanRemoval = true, cascade = CascadeType.ALL
-			, fetch = FetchType.LAZY)
+
+	@OneToMany(mappedBy = "usuario", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Telefone> telefones = new ArrayList<Telefone>();
-	
+
 	@OneToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = "usuarios_role", uniqueConstraints = @UniqueConstraint (
-			columnNames = {"usuario_id","role_id"}, name = "unique_role_user"),
-	joinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "id", table = "usuario", unique = false,
-	foreignKey = @ForeignKey(name = "usuario_fk", value = ConstraintMode.CONSTRAINT)), 
-	inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id", table = "role", unique = false, updatable = false,
-	foreignKey = @ForeignKey(name = "role_fk", value = ConstraintMode.CONSTRAINT)))
-	private List<Role> roles = new ArrayList<Role>(); //acessos
-	
+	@JoinTable(name = "usuarios_role", uniqueConstraints = @UniqueConstraint(columnNames = { "usuario_id",
+			"role_id" }, name = "unique_role_user"), joinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "id", table = "usuario", unique = false, foreignKey = @ForeignKey(name = "usuario_fk", value = ConstraintMode.CONSTRAINT)), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id", table = "role", unique = false, updatable = false, foreignKey = @ForeignKey(name = "role_fk", value = ConstraintMode.CONSTRAINT)))
+	private List<Role> roles = new ArrayList<Role>(); // acessos
+
 	private String token = "";
-	
+
 	private String cep;
-	
+
 	private String logradouro;
-	
+
 	private String complemento;
-	
+
 	private String bairro;
-	
+
 	private String localidade;
-	
+
 	private String uf;
+	
+	@ManyToOne
+	private Profissao profissao;
+
+	// @JsonFormat(pattern = "dd/MM/yyyy")
+	//@Temporal(TemporalType.DATE)
+	// @DateTimeFormat(iso = ISO.DATE,pattern ="dd/MM/yyyy")
+	private String Nascimento;
+	
+	private BigDecimal salario;
 
 	public Long getId() {
 		return id;
@@ -100,7 +106,7 @@ public class Usuario implements UserDetails{
 	public void setNome(String nome) {
 		this.nome = nome;
 	}
-	
+
 	public List<Telefone> getTelefones() {
 		return telefones;
 	}
@@ -108,19 +114,19 @@ public class Usuario implements UserDetails{
 	public void setTelefones(List<Telefone> telefones) {
 		this.telefones = telefones;
 	}
-	
+
 	public String getToken() {
 		return token;
 	}
-	
+
 	public void setToken(String token) {
 		this.token = token;
 	}
-	
+
 	public void setCpf(String cpf) {
 		this.cpf = cpf;
 	}
-	
+
 	public String getCpf() {
 		return cpf;
 	}
@@ -173,6 +179,30 @@ public class Usuario implements UserDetails{
 		this.uf = uf;
 	}
 
+	public String getNascimento() {
+		return Nascimento;
+	}
+
+	public void setNascimento(String nascimento) {
+		Nascimento = nascimento;
+	}
+	
+	public Profissao getProfissao() {
+		return profissao;
+	}
+	
+	public void setProfissao(Profissao profissao) {
+		this.profissao = profissao;
+	}
+	
+	public BigDecimal getSalario() {
+		return salario;
+	}
+	
+	public void setSalario(BigDecimal salario) {
+		this.salario = salario;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -200,7 +230,7 @@ public class Usuario implements UserDetails{
 
 	// São os acessos do usuário ROLE_ADMIN ou ROLE_VISITANTE
 	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
+	public Collection<Role> getAuthorities() {
 		return roles;
 	}
 
@@ -209,7 +239,7 @@ public class Usuario implements UserDetails{
 	public String getPassword() {
 		return this.senha;
 	}
-	
+
 	@JsonIgnore
 	@Override
 	public String getUsername() {
@@ -221,7 +251,7 @@ public class Usuario implements UserDetails{
 	public boolean isAccountNonExpired() {
 		return true;
 	}
-	
+
 	@JsonIgnore
 	@Override
 	public boolean isAccountNonLocked() {
@@ -239,8 +269,5 @@ public class Usuario implements UserDetails{
 	public boolean isEnabled() {
 		return true;
 	}
-	
-	
-	
-	
+
 }

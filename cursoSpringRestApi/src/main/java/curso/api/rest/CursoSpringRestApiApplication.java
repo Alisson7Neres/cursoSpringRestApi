@@ -34,6 +34,10 @@ public class CursoSpringRestApiApplication implements WebMvcConfigurer{
 		registry.addMapping("/usuario/**")
 		.allowedMethods("*")
 		.allowedOrigins("*");
+		
+		registry.addMapping("/profissao/**")
+		.allowedMethods("*")
+		.allowedOrigins("*");
 	}
 
 }
