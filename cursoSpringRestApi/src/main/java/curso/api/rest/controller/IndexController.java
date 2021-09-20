@@ -8,6 +8,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -34,6 +37,7 @@ import curso.api.rest.model.Usuario;
 import curso.api.rest.repository.TelefoneRepository;
 import curso.api.rest.repository.UsuarioRepository;
 import curso.api.rest.services.ImplementacaoUserDetailsService;
+import curso.api.rest.services.ServiceRelatorio;
 
 @CrossOrigin(origins = "*")
 @RestController // Arquitetura REST
@@ -48,6 +52,9 @@ public class IndexController {
 	
 	@Autowired
 	private ImplementacaoUserDetailsService implementacaoUserDetailsService;
+	
+	@Autowired
+	private ServiceRelatorio serviceRelatorio;
 
 	// Serviço RESTFul
 
@@ -220,5 +227,15 @@ public class IndexController {
 		}
 		
 		return new ResponseEntity<Page<Usuario>>(list, HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/relatorio", produces="application/text")
+	public ResponseEntity<String> downloadRelatorio(HttpServletRequest request) throws Exception {
+		byte[] pdf = serviceRelatorio.gerarRelatorio("relatorio-usuario", 
+				request.getServletContext());
+		
+		String base64Pdf = "data:application/pdf;base64," + Base64.encodeBase64String(pdf);
+		return new ResponseEntity<String>(base64Pdf, HttpStatus.OK);
+		
 	}
 }
