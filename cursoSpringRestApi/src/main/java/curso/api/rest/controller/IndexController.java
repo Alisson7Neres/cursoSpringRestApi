@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.Gson;
 
 import curso.api.rest.model.Telefone;
+import curso.api.rest.model.UserReport;
 import curso.api.rest.model.Usuario;
 import curso.api.rest.repository.TelefoneRepository;
 import curso.api.rest.repository.UsuarioRepository;
@@ -229,13 +232,36 @@ public class IndexController {
 		return new ResponseEntity<Page<Usuario>>(list, HttpStatus.OK);
 	}
 	
+	@SuppressWarnings("all")
 	@GetMapping(value = "/relatorio", produces="application/text")
 	public ResponseEntity<String> downloadRelatorio(HttpServletRequest request) throws Exception {
-		byte[] pdf = serviceRelatorio.gerarRelatorio("relatorio-usuario", 
-				request.getServletContext());
+		byte[] pdf = serviceRelatorio.gerarRelatorio("relatorio-usuario",
+				new HashMap(),  request.getServletContext());
 		
 		String base64Pdf = "data:application/pdf;base64," + Base64.encodeBase64String(pdf);
 		return new ResponseEntity<String>(base64Pdf, HttpStatus.OK);
+		
+	}
+	
+	@PostMapping(value = "/relatorio/", produces="application/text")
+	public ResponseEntity<String> downloadRelatorioParam(HttpServletRequest request, 
+			@RequestBody UserReport userReport) throws Exception {
+		
+
+		String dataInicio = userReport.getDataInicio();
+		
+		String dataFim =userReport.getDataFim();
+		
+		Map<String, Object> params = new HashMap<>();
+		
+		params.put("DATA_INICIO", dataInicio);
+		params.put("DATA_FIM", dataFim);
+		
+		byte[] pdf = serviceRelatorio.gerarRelatorio("relatorio-usuario-param", 
+				params, request.getServletContext());
+		
+		String base64Pdf = "data:application/pdf;base64," + Base64.encodeBase64String(pdf);
+		return new ResponseEntity<>(base64Pdf, HttpStatus.OK);
 		
 	}
 }
