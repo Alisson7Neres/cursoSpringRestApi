@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.Gson;
 
 import curso.api.rest.model.Telefone;
+import curso.api.rest.model.UserChart;
 import curso.api.rest.model.UserReport;
 import curso.api.rest.model.Usuario;
 import curso.api.rest.repository.TelefoneRepository;
@@ -58,6 +61,9 @@ public class IndexController {
 	
 	@Autowired
 	private ServiceRelatorio serviceRelatorio;
+	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 
 	// Serviço RESTFul
 
@@ -263,5 +269,25 @@ public class IndexController {
 		String base64Pdf = "data:application/pdf;base64," + Base64.encodeBase64String(pdf);
 		return new ResponseEntity<>(base64Pdf, HttpStatus.OK);
 		
+	}
+	
+	@GetMapping(value = "/grafico", produces = "application/json")
+	public ResponseEntity<UserChart> grafico(){
+		
+		UserChart userChart = new UserChart();
+		
+		List<String> resultado = jdbcTemplate.queryForList(
+				"select array_agg(nome) from usuario where salario > 0 union all select cast(array_agg(salario)as character varying[]) from usuario where salario > 0;",
+				String.class);
+		
+		if(!resultado.isEmpty()) {
+			String nomes = resultado.get(0).replaceAll("\\{", "").replaceAll("\\}", "");
+			String salario = resultado.get(1).replaceAll("\\{", "").replaceAll("\\}", "");
+			
+			userChart.setNome(nomes);
+			userChart.setSalario(salario);
+		}
+		
+		return new ResponseEntity<UserChart>(userChart, HttpStatus.OK);
 	}
 }
